@@ -1,146 +1,45 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valor de Monedas en Tiempo Real</title>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prueba de Resolución</title>
+  <style>
     body {
-        margin: 0;
-        padding: 0;
-        width: 8704px;
-        height: 1024px;
-        font-family: "Open Sans", sans-serif;
-        position: relative;
-        overflow: hidden;
+      margin: 0;
+      padding: 0;
+      width: 8704px;
+      height: 1024px;
+      background-color: white;
+      font-family: sans-serif;
     }
 
-    #fondo {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 8704px;
-        height: 1024px;
-        background: url("fondo.png") no-repeat center center;
-        background-size: cover;
-        z-index: 0;
+    .cuadro {
+      width: 1000px;
+      height: 1000px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      float: left;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      color: #888;
     }
-
-    .container {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        z-index: 1;
-    }
-
-    /* 🎯 Ajuste de posición para los valores en la imagen */
-    .data-box {
-        position: absolute;
-        color: #0F3F85;
-        font-size: 48px;
-        font-weight: bold;
-        text-align: center;
-    }
-
-    .data-box {
-  position: absolute;
-  transform: scale(1.0);
-  transform-origin: top left;
-  white-space: nowrap;
-  font-size: 40px;
-}
-
-    /* 🔵 Bloque Izquierdo */
-    #dolar-1 { top: 250px; left: 390px; }
-    #euro-1 { top: 250px; left: 780px; }
-    #bitcoin-1 { top: 250px; left: 1150px; }
-
-    /* 🔵 Bloque Derecho */
-    #dolar-2 { top: 250px; right: 1950px; }
-    #euro-2 { top: 250px; right: 1200px; }
-    #bitcoin-2 { top: 250px; right: 400px; }
-
-    .updated-time {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 2px;
-        font-weight: normal;
-        color: black;
-        z-index: 2;
-    }
-</style>
+  </style>
 </head>
 <body>
-    <div id="fondo"></div>
+  <script>
+    const totalWidth = 8704;
+    const boxSize = 1000;
+    const totalBoxes = Math.floor(totalWidth / boxSize);
 
-    <div class="container">
-        <!-- Bloque Izquierdo -->
-        <div id="dolar-1" class="data-box">Cargando...</div>
-        <div id="euro-1" class="data-box">Cargando...</div>
-        <div id="bitcoin-1" class="data-box">Cargando...</div>
-
-        <!-- Bloque Derecho -->
-        <div id="dolar-2" class="data-box">Cargando...</div>
-        <div id="euro-2" class="data-box">Cargando...</div>
-        <div id="bitcoin-2" class="data-box">Cargando...</div>
-    </div>
-
-    <div id="last-update" class="updated-time"></div>
-
-    <script>
-        async function fetchData() {
-            try {
-                const trmResponse = await fetch("https://www.datos.gov.co/resource/32sa-8pi3.json?$limit=1&$order=vigenciadesde DESC");
-                const trmData = await trmResponse.json();
-                const trmValue = parseFloat(trmData[0].valor);
-                const trmDate = trmData[0].vigenciadesde.split("T")[0];
-
-                const euroResponse = await fetch("https://api.frankfurter.app/latest?from=EUR&to=USD");
-                const euroData = await euroResponse.json();
-                const eurToUsd = euroData?.rates?.USD;
-                if (!eurToUsd) throw new Error("No se pudo obtener el valor del euro");
-
-                const euroCOP = (eurToUsd * trmValue).toLocaleString("es-CO", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-
-                const btcResponse = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=cop");
-                const btcData = await btcResponse.json();
-                const btcValue = btcData.bitcoin.cop.toLocaleString("es-CO");
-
-                const dolarHTML = `$${trmValue.toLocaleString("es-CO")} COP<br><small>TRM ${trmDate}</small>`;
-                const euroHTML = `€${euroCOP} COP`;
-                const bitcoinHTML = `₿${btcValue} COP`;
-
-                // Aplicar en ambos bloques
-                document.getElementById("dolar-1").innerHTML = dolarHTML;
-                document.getElementById("dolar-2").innerHTML = dolarHTML;
-
-                document.getElementById("euro-1").innerHTML = euroHTML;
-                document.getElementById("euro-2").innerHTML = euroHTML;
-
-                document.getElementById("bitcoin-1").innerHTML = bitcoinHTML;
-                document.getElementById("bitcoin-2").innerHTML = bitcoinHTML;
-
-                const now = new Date();
-                const horas = now.getHours();
-                const minutos = now.getMinutes().toString().padStart(2, "0");
-                document.getElementById("last-update").innerText = `Última actualización: ${horas}:${minutos}`;
-            } catch (error) {
-                console.error("Error al cargar los datos:", error);
-                const errorText = "Error al cargar";
-                ["dolar-1", "dolar-2", "euro-1", "euro-2", "bitcoin-1", "bitcoin-2"].forEach(id => {
-                    document.getElementById(id).innerHTML = errorText;
-                });
-            }
-        }
-
-        fetchData();
-        setInterval(fetchData, 12 * 60 * 60 * 1000); // cada 12 horas
-    </script>
+    for (let i = 1; i <= totalBoxes; i++) {
+      const div = document.createElement("div");
+      div.className = "cuadro";
+      div.innerText = `Cuadro ${i}`;
+      document.body.appendChild(div);
+    }
+  </script>
 </body>
 </html>
-

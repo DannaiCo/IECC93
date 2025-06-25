@@ -1,48 +1,136 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Prueba Resolución 3000px</title>
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-    }
-    .contenedor {
-      width: 3000px;
-      height: 576px; /* Altura más estándar para pantallas LED */
-      display: flex;
-      font-family: Arial, sans-serif;
-      font-weight: bold;
-      font-size: 20px;
-      color: white;
-      text-align: center;
-      line-height: 576px;
-    }
-    .bloque {
-      width: 500px;
-      height: 100%;
-    }
-    .b1 { background-color: red; }
-    .b2 { background-color: blue; }
-    .b3 { background-color: green; }
-    .b4 { background-color: yellow; color: black; }
-    .b5 { background-color: purple; }
-    .b6 { background-color: orange; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valor de Monedas en Tiempo Real</title>
+    <style>
+        body {
+            margin: 0;
+            width: 8704px;
+            height: 1024px;
+            overflow: hidden;
+            font-family: "Open Sans", sans-serif;
+        }
+
+        #fondo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 8704px;
+            height: 1024px;
+            background: url("fondo.png") no-repeat center center;
+            background-size: cover;
+            z-index: 0;
+        }
+
+        .data-box {
+            position: absolute;
+            color: #0F3F85;
+            font-size: 56px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 10px;
+            z-index: 2;
+        }
+
+        /* Primera cara */
+        #dolar, #euro, #bitcoin {
+            top: 500px;
+        }
+
+        #dolar { left: 930px; }
+        #euro { left: 1700px; }
+        #bitcoin { left: 2400px; }
+
+        /* Segunda cara (duplicado) */
+        #dolar2, #euro2, #bitcoin2 {
+            top: 500px;
+        }
+
+        #dolar2 { left: 4250px; }
+        #euro2 { left: 5800px; }
+        #bitcoin2 { left: 7300px; }
+
+        .updated-time {
+            position: absolute;
+            bottom: 10px;
+            left: 50px;
+            font-size: 16px;
+            font-weight: normal;
+            color: black;
+            z-index: 3;
+        }
+    </style>
 </head>
 <body>
-  <div class="contenedor">
-    <div class="bloque b1">500px</div>
-    <div class="bloque b2">1000px</div>
-    <div class="bloque b3">1500px</div>
-    <div class="bloque b4">2000px</div>
-    <div class="bloque b5">2500px</div>
-    <div class="bloque b6">3000px</div>
-  </div>
+    <div id="fondo"></div>
+
+    <!-- Primera cara -->
+    <div id="dolar" class="data-box">Cargando...</div>
+    <div id="euro" class="data-box">Cargando...</div>
+    <div id="bitcoin" class="data-box">Cargando...</div>
+
+    <!-- Segunda cara duplicada -->
+    <div id="dolar2" class="data-box">Cargando...</div>
+    <div id="euro2" class="data-box">Cargando...</div>
+    <div id="bitcoin2" class="data-box">Cargando...</div>
+
+    <div id="last-update" class="updated-time"></div>
+
+    <script>
+    async function fetchData() {
+        try {
+            const trmResponse = await fetch("https://www.datos.gov.co/resource/32sa-8pi3.json?$limit=1&$order=vigenciadesde DESC");
+            const trmData = await trmResponse.json();
+            const trmValue = parseFloat(trmData[0].valor);
+            const trmDate = trmData[0].vigenciadesde.split("T")[0];
+
+            const euroResponse = await fetch("https://api.frankfurter.app/latest?from=EUR&to=USD");
+            const euroData = await euroResponse.json();
+            const eurToUsd = euroData?.rates?.USD;
+            if (!eurToUsd) throw new Error("No se pudo obtener el valor del euro");
+
+            const euroCOP = (eurToUsd * trmValue).toLocaleString("es-CO", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+            const btcResponse = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=cop");
+            const btcData = await btcResponse.json();
+            const btcValue = btcData.bitcoin.cop.toLocaleString("es-CO");
+
+            // Mostrar datos en ambos lados
+            const dolarHtml = `$${trmValue.toLocaleString("es-CO")} COP<br><small>TRM ${trmDate}</small>`;
+            const euroHtml = `€${euroCOP} COP`;
+            const bitcoinHtml = `₿${btcValue} COP`;
+
+            document.getElementById("dolar").innerHTML = dolarHtml;
+            document.getElementById("euro").innerHTML = euroHtml;
+            document.getElementById("bitcoin").innerHTML = bitcoinHtml;
+
+            document.getElementById("dolar2").innerHTML = dolarHtml;
+            document.getElementById("euro2").innerHTML = euroHtml;
+            document.getElementById("bitcoin2").innerHTML = bitcoinHtml;
+
+            const now = new Date();
+            const horas = now.getHours();
+            const minutos = now.getMinutes().toString().padStart(2, "0");
+            document.getElementById("last-update").innerText = `Última actualización: ${horas}:${minutos}`;
+        } catch (error) {
+            console.error("Error al cargar los datos:", error);
+            const mensajeError = "Error al cargar";
+            document.getElementById("dolar").innerHTML = mensajeError;
+            document.getElementById("euro").innerHTML = mensajeError;
+            document.getElementById("bitcoin").innerHTML = mensajeError;
+            document.getElementById("dolar2").innerHTML = mensajeError;
+            document.getElementById("euro2").innerHTML = mensajeError;
+            document.getElementById("bitcoin2").innerHTML = mensajeError;
+        }
+    }
+
+    fetchData();
+    setInterval(fetchData, 12 * 60 * 60 * 1000); // cada 12 horas
+    </script>
 </body>
 </html>
-
-
-
- 

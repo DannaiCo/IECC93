@@ -122,19 +122,7 @@
         <div class="frases" id="fraseRotativa"></div>
       </div>
       <script>
-        function escalarStage() {
-          const stage = document.querySelector(".stage");
-
-          const scaleX = window.innerWidth / 3840;
-          const scaleY = window.innerHeight / 542;
-
-          const scale = Math.min(scaleX, scaleY);
-
-          stage.style.transform = `scale(${scale})`;
-        }
-
-        window.addEventListener("resize", escalarStage);
-        window.addEventListener("load", escalarStage);
+       
         // Fecha del Mundial (11 junio 2026)
         const fechaObjetivo = new Date("June 11, 2026 00:00:00").getTime();
 
@@ -153,13 +141,13 @@
 
         // LISTA DE FRASES
         const listaFrases = [
-          "Para:Cantar goles con extraños",
-          "Para:No lavar la camiseta",
-          "Para:Sufrir juntos cada partido",
-          "Para:Vivir 90 min eternos",
-          "Para:Gritarle a la pantalla",
-          "Para:Celebrar como nunca",
-          "Para:Sentirse técnico"
+          "Cantar goles con extraños",
+          "No lavar la camiseta",
+          "Sufrir juntos cada partido",
+          "Vivir 90 min eternos",
+          "Gritarle a la pantalla",
+          "Celebrar como nunca",
+          "Sentirse técnico"
         ];
 
         let indiceActual = 0;
@@ -171,6 +159,7 @@
           const indiceAleatorio = Math.floor(Math.random() * listaFrases.length);
 
           elementoFrase.innerHTML = listaFrases[indiceAleatorio];
+		  
         }
 
         // Mostrar primera frase al cargar
@@ -182,5 +171,3 @@
     </div>
   </body>
 </html>
-
-

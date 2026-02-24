@@ -1,136 +1,184 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valor de Monedas en Tiempo Real</title>
+  <head>
+    <title>Cuenta regresiva Mundial</title>
+
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Open+Sans:ital,wght@1,600&display=swap"
+      rel="stylesheet" />
+
     <style>
-        body {
-            margin: 0;
-            width: 8704px;
-            height: 1024px;
-            overflow: hidden;
-            font-family: "Open Sans", sans-serif;
-        }
+      .stage {
+        position: relative;
+        width: 3840px;
+        height: 542px;
+        transform-origin: top left;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-           #fondo {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 8704px;
-    height: 1024px;
-    background: url("fondo.png") no-repeat center center;
-    background-size: 100% 100%; /* <-- Esto es lo nuevo */
-               
-        }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: black;
+      }
 
-        .data-box {
-            position: absolute;
-            color: #0F3F85;
-            font-size: 56px;
-            font-weight: bold;
-            padding: 10px;
-            border-radius: 10px;
-            z-index: 2;
-        }
+      /* VIDEO */
+      .video-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 3840px;
+        height: 542px;
+        object-fit: cover; /* IMPORTANTE */
+        z-index: 0;
+      }
+      /* CONTENEDOR BASE */
+      .contador {
+        position: absolute;
+        display: flex;
+        flex-direction:;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
 
-        /* Primera cara */
-        #dolar, #euro, #bitcoin {
-            top: 500px;
-        }
+      /* AJUSTA ESTAS POSICIONES SEGÚN TUS CUADROS VERDES */
+      .contador1 {
+        left: 200px;
+        top: 130px;
+        width: 1000px;
+        height: 400px;
+      }
 
-        #dolar { left: 930px; }
-        #euro { left: 1700px; }
-        #bitcoin { left: 2400px; }
+      .contador2 {
+        left: 2500px;
+        top: 130px;
+        width: 900px;
+        height: 400px;
+      }
+      .contador3 {
+        left: 1400px;
+        top: 100px;
+        width: 900px;
+        height: 400px;
+      }
+      /* NÚMERO */
+      .numero {
+        font-family: "Dela Gothic One", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+        font-size: 140px;
+        color: #012bff;
+        line-height: 1;
+      }
 
-        /* Segunda cara (duplicado) */
-        #dolar2, #euro2, #bitcoin2 {
-            top: 500px;
-        }
-
-        #dolar2 { left: 4250px; }
-        #euro2 { left: 5800px; }
-        #bitcoin2 { left: 7300px; }
-
-        .updated-time {
-            position: absolute;
-            bottom: 10px;
-            left: 50px;
-            font-size: 16px;
-            font-weight: normal;
-            color: black;
-            z-index: 3;
-        }
+      /* FRASE */
+      .frase {
+        font-family: "Dela Gothic One", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+        font-size: 150px;
+        color: #012bff;
+        margin-top: -10px;
+      }
+      .frases {
+        font-family: "Open Sans", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 600;
+        font-style: italic;
+        font-variation-settings: "wdth" 100;
+        font-size: 150px;
+        color: #ffffff;
+        line-height: 100%;
+      }
     </style>
-</head>
-<body>
-    <div id="fondo"></div>
+  </head>
 
-    <!-- Primera cara -->
-    <div id="dolar" class="data-box">Cargando...</div>
-    <div id="euro" class="data-box">Cargando...</div>
-    <div id="bitcoin" class="data-box">Cargando...</div>
+  <body>
+    <div class="stage">
+      <video class="video-bg" autoplay muted loop>
+        <source src="fondo.mp4" type="video/mp4" />
+      </video>
 
-    <!-- Segunda cara duplicada -->
-    <div id="dolar2" class="data-box">Cargando...</div>
-    <div id="euro2" class="data-box">Cargando...</div>
-    <div id="bitcoin2" class="data-box">Cargando...</div>
+      <div class="contador contador1">
+        <div class="numero" id="dias1">0</div>
+        <div class="frase">DÍAS</div>
+      </div>
 
-    <div id="last-update" class="updated-time"></div>
+      <div class="contador contador2">
+        <div class="numero" id="dias2">0</div>
+        <div class="frase">DÍAS</div>
+      </div>
+      <div class="contador contador3">
+        <div class="frases" id="fraseRotativa"></div>
+      </div>
+      <script>
+        function escalarStage() {
+          const stage = document.querySelector(".stage");
 
-    <script>
-    async function fetchData() {
-        try {
-            const trmResponse = await fetch("https://www.datos.gov.co/resource/32sa-8pi3.json?$limit=1&$order=vigenciadesde DESC");
-            const trmData = await trmResponse.json();
-            const trmValue = parseFloat(trmData[0].valor);
-            const trmDate = trmData[0].vigenciadesde.split("T")[0];
+          const scaleX = window.innerWidth / 4147;
+          const scaleY = window.innerHeight / 1556;
 
-            const euroResponse = await fetch("https://api.frankfurter.app/latest?from=EUR&to=USD");
-            const euroData = await euroResponse.json();
-            const eurToUsd = euroData?.rates?.USD;
-            if (!eurToUsd) throw new Error("No se pudo obtener el valor del euro");
+          const scale = Math.min(scaleX, scaleY);
 
-            const euroCOP = (eurToUsd * trmValue).toLocaleString("es-CO", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-
-            const btcResponse = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=cop");
-            const btcData = await btcResponse.json();
-            const btcValue = btcData.bitcoin.cop.toLocaleString("es-CO");
-
-            // Mostrar datos en ambos lados
-            const dolarHtml = `$${trmValue.toLocaleString("es-CO")} COP<br><small>TRM ${trmDate}</small>`;
-            const euroHtml = `€${euroCOP} COP`;
-            const bitcoinHtml = `₿${btcValue} COP`;
-
-            document.getElementById("dolar").innerHTML = dolarHtml;
-            document.getElementById("euro").innerHTML = euroHtml;
-            document.getElementById("bitcoin").innerHTML = bitcoinHtml;
-
-            document.getElementById("dolar2").innerHTML = dolarHtml;
-            document.getElementById("euro2").innerHTML = euroHtml;
-            document.getElementById("bitcoin2").innerHTML = bitcoinHtml;
-
-            const now = new Date();
-            const horas = now.getHours();
-            const minutos = now.getMinutes().toString().padStart(2, "0");
-            document.getElementById("last-update").innerText = `Última actualización: ${horas}:${minutos}`;
-        } catch (error) {
-            console.error("Error al cargar los datos:", error);
-            const mensajeError = "Error al cargar";
-            document.getElementById("dolar").innerHTML = mensajeError;
-            document.getElementById("euro").innerHTML = mensajeError;
-            document.getElementById("bitcoin").innerHTML = mensajeError;
-            document.getElementById("dolar2").innerHTML = mensajeError;
-            document.getElementById("euro2").innerHTML = mensajeError;
-            document.getElementById("bitcoin2").innerHTML = mensajeError;
+          stage.style.transform = `scale(${scale})`;
         }
-    }
 
-    fetchData();
-    setInterval(fetchData, 12 * 60 * 60 * 1000); // cada 12 horas
-    </script>
-</body>
+        window.addEventListener("resize", escalarStage);
+        window.addEventListener("load", escalarStage);
+        // Fecha del Mundial (11 junio 2026)
+        const fechaObjetivo = new Date("June 11, 2026 00:00:00").getTime();
+
+        function actualizarContador() {
+          const ahora = new Date().getTime();
+          const diferencia = fechaObjetivo - ahora;
+
+          const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+
+          document.getElementById("dias1").innerHTML = dias;
+          document.getElementById("dias2").innerHTML = dias;
+        }
+
+        actualizarContador();
+        setInterval(actualizarContador, 60000);
+
+        // LISTA DE FRASES
+        const listaFrases = [
+          "Cantar goles con extraños",
+          "No lavar la camiseta",
+          "Sufrir juntos cada partido",
+          "Vivir 90 min eternos",
+          "Gritarle a la pantalla",
+          "Celebrar como nunca",
+          "Sentirse técnico"
+        ];
+
+        let indiceActual = 0;
+
+        // Función para cambiar frase
+        function cambiarFrase() {
+          const elementoFrase = document.getElementById("fraseRotativa");
+
+          const indiceAleatorio = Math.floor(Math.random() * listaFrases.length);
+
+          elementoFrase.innerHTML = listaFrases[indiceAleatorio];
+        }
+
+        // Mostrar primera frase al cargar
+        cambiarFrase();
+
+        // Cambiar cada 30 minutos (1800000 ms)
+        setInterval(cambiarFrase, 6000);
+      </script>
+    </div>
+  </body>
 </html>
